@@ -24,13 +24,25 @@ def build_bigram(sequence):
     # Task 1.2
     # Return a bigram model.
 
+    # counts the number of times a bigram appears in the sequence
+    bigram_count = collections.Counter(zip(sequence, sequence[1:]))
+
+    # calculates the total number of each bigram in the sequence
+    model = {bigram: count for bigram, count in bigram_count.items()}
+
     return model
 
 def build_n_gram(sequence, n):
     # Task 1.3
     # Return an n-gram model.
-    # Replace the line below with your code.
-    raise NotImplementedError
+    
+    # counts the number of times an n-gram appears in the sequence
+    n_gram_count = collections.Counter(zip(*([sequence[i:] for i in range(n)])))
+
+    # calculates the total number of each n-gram in the sequence
+    model = {n_gram: count for n_gram, count in n_gram_count.items()}
+
+    return model
 
 def query_n_gram(model, sequence):
     # Task 2
@@ -83,23 +95,27 @@ def log_likelihood_blended(sequence, models):
 
 if __name__ == '__main__':
 
-    sequence = tokenise('random.txt')
+    sequence = tokenise('assignment3corpus.txt')
 
+    
     # Task 1.1 test code
     model = build_unigram(sequence[:20])
+    print("Unigram Model:")
     print(model)
-
-    '''
+    
+    
     # Task 1.2 test code
     model = build_bigram(sequence[:20])
+    print("\nBigram Model:")
     print(model)
-    '''
+
     
     # Task 1.3 test code
-    '''
-    model = build_n_gram(sequence[:20], 5)
+    n_gram = 5
+    model = build_n_gram(sequence[:20], n_gram)
+    print("\n" + str(n_gram) + "-gram Model:")
     print(model)
-    '''
+    
 
     # Task 2 test code
     '''
