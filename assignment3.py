@@ -10,12 +10,11 @@ def tokenise(filename):
 def build_unigram(sequence):
     # Task 1.1
     # Return a unigram model.
-
     # counts the number of times each word appears in the sequence
     word_count = collections.Counter(sequence)
 
-    # calculates the total number of each word in the sequence
-    model = {word: count for word, count in word_count.items()}
+    # calculates the total number of each word in the sequence, and returns the model as a dictionary
+    model = {word: {'count': {'value': count}} for word, count in word_count.items()}
 
     # return model
     return model
@@ -23,12 +22,15 @@ def build_unigram(sequence):
 def build_bigram(sequence):
     # Task 1.2
     # Return a bigram model.
-
     # counts the number of times a bigram appears in the sequence
     bigram_count = collections.Counter(zip(sequence, sequence[1:]))
 
-    # calculates the total number of each bigram in the sequence
-    model = {bigram: count for bigram, count in bigram_count.items()}
+    # calculates the total number of each bigram in the sequence, and returns the model as a dictionary
+    model = {}
+    for (word_1, word_2), count in bigram_count.items():
+        if word_1 not in model:
+            model[word_1] = {}
+        model[word_1][word_2] = count
 
     return model
 
@@ -39,8 +41,13 @@ def build_n_gram(sequence, n):
     # counts the number of times an n-gram appears in the sequence
     n_gram_count = collections.Counter(zip(*([sequence[i:] for i in range(n)])))
 
-    # calculates the total number of each n-gram in the sequence
-    model = {n_gram: count for n_gram, count in n_gram_count.items()}
+    # calculates the total number of each n-gram in the sequence, and returns the model as a dictionary
+    model = {}
+    for n_gram, count in n_gram_count.items():
+        prefix, next_word = n_gram[:-1], n_gram[-1]
+        if prefix not in model:
+            model[prefix] = {}
+        model[prefix][next_word] = count
 
     return model
 
@@ -48,7 +55,12 @@ def query_n_gram(model, sequence):
     # Task 2
     # Return a prediction as a dictionary.
     # Replace the line below with your code.
-    raise NotImplementedError
+
+    # check if sequence exists in the model
+    if sequence in model:
+        return model[sequence]
+    else:
+        return None
 
 def blended_probabilities(preds, factor=0.8):
     blended_probs = {}
@@ -118,9 +130,8 @@ if __name__ == '__main__':
     
 
     # Task 2 test code
-    '''
+    print("\nQuerying n-gram model:")
     print(query_n_gram(model, tuple(sequence[:4])))
-    '''
 
     # Task 3 test code
     '''
