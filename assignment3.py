@@ -1,6 +1,7 @@
 import re
 import math
 import random
+import collections
 
 def tokenise(filename):
     with open(filename, 'r') as f:
@@ -9,14 +10,21 @@ def tokenise(filename):
 def build_unigram(sequence):
     # Task 1.1
     # Return a unigram model.
-    # Replace the line below with your code.
-    raise NotImplementedError
+
+    # counts the number of times each word appears in the sequence
+    word_count = collections.Counter(sequence)
+
+    # calculates the total number of each word in the sequence
+    model = {word: count for word, count in word_count.items()}
+
+    # return model
+    return model
 
 def build_bigram(sequence):
     # Task 1.2
     # Return a bigram model.
-    # Replace the line below with your code.
-    raise NotImplementedError
+
+    return model
 
 def build_n_gram(sequence, n):
     # Task 1.3
@@ -75,20 +83,18 @@ def log_likelihood_blended(sequence, models):
 
 if __name__ == '__main__':
 
-    sequence = tokenise('assignment3corpus.txt')
+    sequence = tokenise('random.txt')
 
     # Task 1.1 test code
-    '''
     model = build_unigram(sequence[:20])
     print(model)
-    '''
 
-    # Task 1.2 test code
     '''
+    # Task 1.2 test code
     model = build_bigram(sequence[:20])
     print(model)
     '''
-
+    
     # Task 1.3 test code
     '''
     model = build_n_gram(sequence[:20], 5)
