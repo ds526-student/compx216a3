@@ -25,7 +25,7 @@ def build_bigram(sequence):
     # counts the number of times a bigram appears in the sequence
     bigram_count = collections.Counter(zip(sequence, sequence[1:]))
 
-    # calculates the total number of each bigram in the sequence, and returns the model as a dictionary
+    # calculates the total number of each bigram in the sequence, and returns the model with an inner and outer dictionary
     model = {}
     for (word_1, word_2), count in bigram_count.items():
         if word_1 not in model:
@@ -41,7 +41,7 @@ def build_n_gram(sequence, n):
     # counts the number of times an n-gram appears in the sequence
     n_gram_count = collections.Counter(zip(*([sequence[i:] for i in range(n)])))
 
-    # calculates the total number of each n-gram in the sequence, and returns the model as a dictionary
+    # calculates the total number of each n-gram in the sequence, and returns the model with an inner and outer dictionary
     model = {}
     for n_gram, count in n_gram_count.items():
         prefix, next_word = n_gram[:-1], n_gram[-1]
@@ -90,8 +90,34 @@ def blended_probabilities(preds, factor=0.8):
 def sample(sequence, models):
     # Task 3
     # Return a token sampled from blended predictions.
-    # Replace the line below with your code.
-    raise NotImplementedError
+
+    # store the predictions
+    predictions = [] 
+
+    # iterate through the models
+    for model in models:
+        # find the n-gram size
+        n_gram = max(len(key) for key in model.keys()) + 1
+
+        # compare the length of the sequence to the n-gram size
+        if len(sequence) >= n_gram - 1:
+            context = tuple(sequence[-(n_gram - 1):])  # prediction context
+            prediction = query_n_gram(model, context)  
+            # if there is a prediction append it
+            if prediction is not None:
+                predictions.append(prediction)
+
+    # return None if no predictions were made
+    if not predictions:
+        return None
+
+    # blend the predictions
+    blended_predictions = blended_probabilities(predictions)
+    blended_keys = list(blended_predictions.keys())
+    blended_values = list(blended_predictions.values())
+
+    # token randomly chosen from blended probabilities
+    return random.choices(blended_keys, weights=blended_values, k=1)[0]
 
 def log_likelihood_ramp_up(sequence, models):
     # Task 4.1
@@ -134,7 +160,7 @@ if __name__ == '__main__':
     print(query_n_gram(model, tuple(sequence[:4])))
 
     # Task 3 test code
-    '''
+    print("\nSampling from blended predictions:")
     models = [build_n_gram(sequence, i) for i in range(10, 0, -1)]
     head = []
     for _ in range(100):
@@ -142,7 +168,6 @@ if __name__ == '__main__':
         print(tail, end=' ')
         head.append(tail)
     print()
-    '''
 
     # Task 4.1 test code
     '''
