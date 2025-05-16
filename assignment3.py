@@ -122,14 +122,79 @@ def sample(sequence, models):
 def log_likelihood_ramp_up(sequence, models):
     # Task 4.1
     # Return a log likelihood value of the sequence based on the models.
-    # Replace the line below with your code.
-    raise NotImplementedError
+    
+    # store the log likelihood
+    log_likelihood = 0.0
+
+    # iterate through the sequence
+    for i, word in enumerate(sequence):
+        # determine the model and context based on the index
+        if i == 0:
+            # if the sequence is empty, use the unigram
+            model = models[-1] 
+            context = ()
+        elif i < len(models):
+            # if the index is less than the number of models, use the corresponding model
+            model = models[-(i + 1)]
+            context = tuple(sequence[:i])
+        else:
+            # if the index is greater than the number of models, use the largest n-gram model
+            model = models[0]  # largest n-gram
+            context = tuple(sequence[i - (len(models) - 1):i])
+
+        # query the model for the probabilities
+        probs = query_n_gram(model, context)
+
+        if probs is None or word not in probs:
+            return -math.inf
+
+        total = sum(probs.values()) # total probability
+        prob = probs[word] / total # probability of the word
+        log_likelihood += math.log(prob) # log of the probability
+
+    return log_likelihood
 
 def log_likelihood_blended(sequence, models):
     # Task 4.2
     # Return a log likelihood value of the sequence based on the models.
-    # Replace the line below with your code.
-    raise NotImplementedError
+
+    # store the log likelihood
+    log_likelihood = 0.0
+
+    # iterate through the sequence
+    for i, word in enumerate(sequence):
+        # store the predictions
+        preds = []
+        # iterate through the models
+        for model in models:
+            # find the n-gram size
+            n_gram = max(len(key) for key in model.keys()) + 1
+
+            # compare the length of the sequence to the n-gram size
+            if i >= n_gram - 1:
+                context = tuple(sequence[i - (n_gram - 1):i])
+            # if the index is less than the n-gram size, use the corresponding model
+            else:
+                context = tuple(sequence[:i])
+
+            pred = query_n_gram(model, context) 
+
+            # append the prediction to the list
+            if pred is not None: 
+                preds.append(pred)
+        # check that there are predictions
+        if not preds:
+            return -math.inf
+        
+        blended = blended_probabilities(preds) # blend the predictions
+
+        # check that the word is in the blended predictions
+        if word not in blended or blended[word] == 0:
+            return -math.inf
+        
+        log_likelihood += math.log(blended[word]) # log of the blended probability
+
+    return log_likelihood
 
 if __name__ == '__main__':
 
@@ -170,11 +235,9 @@ if __name__ == '__main__':
     print()
 
     # Task 4.1 test code
-    '''
+    print("\nLog likelihood of the sequence:")
     print(log_likelihood_ramp_up(sequence[:20], models))
-    '''
 
     # Task 4.2 test code
-    '''
+    print("\nLog likelihood of the sequence with blended predictions:")
     print(log_likelihood_blended(sequence[:20], models))
-    '''
